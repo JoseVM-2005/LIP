@@ -1,0 +1,220 @@
+[
+    {
+        "id": "c2a2049dad78ade9",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "dcc70a350583b774",
+        "type": "mqtt in",
+        "z": "c2a2049dad78ade9",
+        "name": "sensor/data",
+        "topic": "sensor/data",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "04f21da4cbcb8b22",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 170,
+        "y": 140,
+        "wires": [
+            [
+                "d410145d3f35daa7"
+            ]
+        ]
+    },
+    {
+        "id": "6be38c7b6e5e8314",
+        "type": "influxdb out",
+        "z": "c2a2049dad78ade9",
+        "influxdb": "451a0ba90a931a30",
+        "name": "",
+        "measurement": "environment",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "sensor_data",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "",
+        "bucket": "",
+        "x": 700,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "1a2b63f77f824ab9",
+        "type": "http in",
+        "z": "c2a2049dad78ade9",
+        "name": "Fan Control HTTP In",
+        "url": "/fan",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 230,
+        "y": 320,
+        "wires": [
+            [
+                "8f537d82bf2f0d52",
+                "bef7c768da2e349e"
+            ]
+        ]
+    },
+    {
+        "id": "718d102a62105d19",
+        "type": "http response",
+        "z": "c2a2049dad78ade9",
+        "name": "HTTP 200",
+        "statusCode": "200",
+        "headers": {},
+        "x": 640,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "f2ce90eaa46c1e36",
+        "type": "mqtt out",
+        "z": "c2a2049dad78ade9",
+        "name": "► fan/control",
+        "topic": "fan/control",
+        "qos": "0",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "mqtt_broker",
+        "x": 790,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "8f537d82bf2f0d52",
+        "type": "debug",
+        "z": "c2a2049dad78ade9",
+        "name": "Debug HTTP payload",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 410,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "bef7c768da2e349e",
+        "type": "function",
+        "z": "c2a2049dad78ade9",
+        "name": "function 2",
+        "func": "// msg.req.query.duty contains the numeric duty from the URL\nconst duty = parseInt(msg.req.query.duty, 10);\nif (!isNaN(duty) && duty >= 0 && duty <= 100) {\n    msg.payload = duty;\n} else {\n    node.error(\"Invalid duty: \" + msg.req.query.duty);\n    msg.payload = 0;\n}\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 300,
+        "wires": [
+            [
+                "718d102a62105d19",
+                "f2ce90eaa46c1e36"
+            ]
+        ]
+    },
+    {
+        "id": "d410145d3f35daa7",
+        "type": "json",
+        "z": "c2a2049dad78ade9",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": true,
+        "x": 350,
+        "y": 140,
+        "wires": [
+            [
+                "6be38c7b6e5e8314"
+            ]
+        ]
+    },
+    {
+        "id": "04f21da4cbcb8b22",
+        "type": "mqtt-broker",
+        "name": "MQTT Docker",
+        "broker": "192.168.120.150",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "451a0ba90a931a30",
+        "type": "influxdb",
+        "hostname": "192.168.120.150",
+        "port": 8086,
+        "protocol": "http",
+        "database": "sensor_data",
+        "name": "",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "1.x",
+        "url": "http://localhost:8086",
+        "timeout": 10,
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "mqtt_broker",
+        "type": "mqtt-broker",
+        "name": "Mosquitto",
+        "broker": "mosquitto",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]
