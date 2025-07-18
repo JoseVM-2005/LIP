@@ -135,7 +135,7 @@ def adc_to_temp(adc_values):
     result = {}
     for ch, code in adc_values.items():
         if code == 0:
-            result[ch] = math.nan
+            result[ch] = -1000.1
         else:
             resistance = PT1000_R0 * ((2**12) / code - 1)
             result[ch] = float(spline(resistance))
