@@ -290,8 +290,13 @@ def sensor_loop():
             tmp_payload   = {f"adc{ch}_temp": tmp    for ch, tmp  in pt1000_temps.items()}
 
             payload = {**env_payload, **adc_payload, **tmp_payload}
-            mqtt_client.publish(MQTT_TOPIC_PUB, json.dumps(payload), qos=1, retain=True)
-            log.info("Published: %s", payload)
+            result = mqtt_client.publish(MQTT_TOPIC_PUB, json.dumps(payload), qos=1, retain=True) ##Last change done here
+            result.wait_for_publish(2)
+            if result.is_published():
+                log.info("Published payload: %s", payload)
+            else:
+                log.info("Failed to publish payload")
+
 
         except Exception as exc:
             bme_errors += 1
