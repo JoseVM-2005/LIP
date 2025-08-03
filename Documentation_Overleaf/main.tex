@@ -123,11 +123,30 @@ José Miguel\\
 
     SSH should be enabled, and a static IP address is required. Furthermore, make sure that $I^2C$ communication is enabled. Use "sudo raspi-config" and navigate to "Interfaces Options" -> "I2C". \\
 
-    Install all the necessary packages:
+    Install all the necessary packages to run the main script:
 
 \begin{lstlisting}[numbers=none]
-sudo apt install -y python3-pip python3-smbus python3-rpi.gpio python3-gpiozero \
+sudo apt install -y python3-pip python3-smbus pigpio python3-pigpio python3-gpiozero \
 i2c-tools python3-smbus2 python3-paho-mqtt python3-scipy
+\end{lstlisting}
+
+    Install all the necessary files to run the secondary script to extract the data from influxdb.
+
+\begin{lstlisting}[numbers=none]
+    sudo apt install -y python3-tabulate python3-pandas python3-influxdb
+\end{lstlisting}
+
+    Enable hardware PWM by editing the /boot/firmware/config.txt file to include the following line:
+    
+\begin{lstlisting}[numbers=none]
+dtoverlay=pwm-2chan,pin=12,func=4,pin2=13,func2=4
+\end{lstlisting}
+
+    Reboot the Raspberry Pi and enable the Pigpio daemon using:
+
+\begin{lstlisting}[numbers=none]
+    sudo systemctl enable pigpio
+    sudo systemctl start pigpio
 \end{lstlisting}
     
 
@@ -199,8 +218,17 @@ Create a database named "sensor\_data" and exit using:
 
 \end{lstlisting}
 
+\subsubsection{Debugging:}
+Each Influxdb bucket must contain one and only one type of variable. Furthermore, the current nodered setup does not support nan floats. With that being said, if different types of data are fed to the same bucket, influx will choke and require reset. To do so, open the influx terminal and clean the dataseries:
+
+\begin{lstlisting}[numbers=none]
+    docker exec -it influxdb influx
+     > USE sensor_data
+     > DROP MEASUREMENT "environment"    
+\end{lstlisting}
+
 \subsection{Setting up Node-Red}
-    Open Node-Red using a Web browser. If the set-up is being done via the Raspberry Pi, search: 
+    Open Node-Red using a Web browser. If the setup is being done via the Raspberry Pi, search: 
 
     \begin{lstlisting}[
     keywordstyle=\color{black},
